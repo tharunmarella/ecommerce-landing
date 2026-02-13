@@ -3,7 +3,7 @@ import Header from '../components/Header'
 import Hero from '../components/Hero'
 import ProductCard from '../components/ProductCard'
 import Footer from '../components/Footer'
-import productsData from '../lib/products.json'
+import productsData from '@/lib/productsData'
 
 export default function Home({ products }: { products: Array<{ id: number; name: string; price: string; image: string }> }) {
   return (
@@ -64,7 +64,7 @@ export default function Home({ products }: { products: Array<{ id: number; name:
   )
 }
 
-export async function getStaticProps() {
+export function getStaticProps() {
   const products = productsData;
-  return { props: { products } }
+  return { props: { products } };
 }

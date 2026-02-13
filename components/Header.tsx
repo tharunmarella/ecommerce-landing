@@ -9,8 +9,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ShoppingCart, User, Search, Menu } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
+  const { isAuthenticated, logout } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4 md:px-8">
@@ -44,23 +47,33 @@ export default function Header() {
             <span className="sr-only">Search</span>
           </Button>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Account</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Orders</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Account</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>Orders</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" asChild>
+              <Link href="/login">
+                Login
+              </Link>
+            </Button>
+          )}
 
           <Button variant="ghost" size="icon">
             <ShoppingCart className="h-5 w-5" />
@@ -89,6 +102,14 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link href="/contact">Contact</Link>
                 </DropdownMenuItem>
+                {!isAuthenticated && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">Login</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
