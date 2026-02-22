@@ -1,9 +1,17 @@
+import * as React from 'react';
 import Head from 'next/head';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import Hero from '../components/Hero';
-import ProductCard from '../components/ProductCard';
-import prisma from '../lib/prisma';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import ProductCard from '@/components/ProductCard';
+import Hero from '@/components/Hero';
+import prisma from '@/lib/prisma';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { Separator } from "@/components/ui/separator"
 
 export default function Home({ products }: { products: Array<{ id: number; name: string; price: number; image: string }> }) {
   return (
@@ -19,12 +27,13 @@ export default function Home({ products }: { products: Array<{ id: number; name:
       <main className="flex-grow">
         <Hero />
 
-        <section className="py-16 px-4 md:px-8 container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Collection</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+        <section className="py-20 px-4 md:px-8 container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 tracking-tight">Featured Collection</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Handpicked items just for you. Explore our latest arrivals and find your perfect style.
             </p>
+            <Separator className="w-24 mx-auto mt-8 bg-primary h-1" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -35,26 +44,39 @@ export default function Home({ products }: { products: Array<{ id: number; name:
         </section>
 
         {/* Additional Section: Why Choose Us */}
-        <section className="bg-muted py-16 px-4 md:px-8">
-          <div className="container mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-12">Why Choose LuxeStore?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="p-6 bg-background rounded-lg shadow-sm">
-                <div className="text-4xl mb-4">🚚</div>
-                <h3 className="text-xl font-semibold mb-2">Free Shipping</h3>
-                <p className="text-muted-foreground">On all orders over $50. Fast and reliable delivery to your doorstep.</p>
-              </div>
-              <div className="p-6 bg-background rounded-lg shadow-sm">
-                <div className="text-4xl mb-4">🛡️</div>
-                <h3 className="text-xl font-semibold mb-2">Secure Payment</h3>
-                <p className="text-muted-foreground">Your transactions are safe with our encrypted payment processing.</p>
-              </div>
-              <div className="p-6 bg-background rounded-lg shadow-sm">
-                <div className="text-4xl mb-4">↩️</div>
-                <h3 className="text-xl font-semibold mb-2">Easy Returns</h3>
-                <p className="text-muted-foreground">Not satisfied? Return within 30 days for a full refund. No questions asked.</p>
-              </div>
+        <section className="bg-muted/50 py-24 px-4 md:px-8 border-y">
+          <div className="container mx-auto max-w-4xl">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Why Choose LuxeStore?</h2>
+              <p className="text-muted-foreground">We pride ourselves on providing the best experience for our customers.</p>
             </div>
+            
+            <Accordion type="single" collapsible className="w-full bg-background rounded-xl p-6 shadow-sm border">
+              <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">🚚 Free & Fast Shipping</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-base">
+                  Enjoy complimentary shipping on all orders over $50. We partner with top-tier carriers to ensure your premium purchases arrive safely and swiftly at your doorstep within 3-5 business days.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger className="text-lg font-semibold">🛡️ Secure & Encrypted Payments</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-base">
+                  Your security is our top priority. We use industry-standard SSL encryption and partner with trusted payment processors like Stripe to ensure your financial information is always protected.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger className="text-lg font-semibold">↩️ Hassle-Free 30-Day Returns</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-base">
+                  Not completely satisfied with your purchase? No problem. We offer a straightforward 30-day return policy. Simply contact our support team, and we'll help you with a full refund or exchange.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-4">
+                <AccordionTrigger className="text-lg font-semibold">✨ Premium Quality Guaranteed</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-base">
+                  Every item in our collection undergoes a rigorous quality check. We source only the finest materials and work with artisans who share our commitment to excellence and style.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </section>
       </main>

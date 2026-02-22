@@ -46,7 +46,7 @@ const products = [
   {
     name: "Classic Leather Boots",
     price: "179.99",
-    image: "https://images.unsplash.com/photo-1543946207-f0255007493a?auto=format&fit=crop&w=800&q=80", // Classic Leather Boots
+    image: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&w=800&q=80", // Classic Leather Boots
   },
   {
     name: "Wool Knit Sweater",
@@ -77,7 +77,7 @@ const products = [
   {
     name: "Eco-friendly Water Bottle",
     price: "24.99",
-    image: "https://images.unsplash.com/photo-1555934817-13b5aa469347?auto=format&fit=crop&w=800&q=80", // Eco-friendly Water Bottle
+    image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80", // Eco-friendly Water Bottle
   },
   {
     name: "Smartwatch",

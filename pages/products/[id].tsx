@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import SimpleImage from '@/components/SimpleImage';
 import SSRImage from '@/components/SSRImage';
 import prisma from '@/lib/prisma';
 import { useCart } from '@/context/CartContext';

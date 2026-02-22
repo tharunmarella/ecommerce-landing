@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import DebugImage from '@/components/DebugImage';
+import SafeImage from '@/components/SafeImage';
 
 export default function DebugPage() {
   const testUrls = [
@@ -20,7 +20,7 @@ export default function DebugPage() {
           {testUrls.map((url, index) => (
             <div key={index} className="border rounded-lg p-4">
               <h3 className="text-lg font-semibold mb-4">Test Image {index + 1}</h3>
-              <DebugImage
+              <SafeImage
                 src={url}
                 alt={`Test image ${index + 1}`}
                 className="w-full h-64 object-cover rounded"

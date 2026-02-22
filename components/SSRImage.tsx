@@ -9,37 +9,31 @@ interface SSRImageProps {
   fallbackText?: string;
 }
 
+// Simple pre-decoder for SSR that doesn't need DOM
+const preDecode = (text: string): string => {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'");
+};
+
 export default function SSRImage({
   src,
   alt,
   className = '',
   fallbackSrc = '/placeholder-product.svg',
-  fallbackText = 'Image not available',
 }: SSRImageProps) {
   const [imageError, setImageError] = useState(false);
-  const [imageSrc, setImageSrc] = useState('');
-  const [isClient, setIsClient] = useState(false);
+  const [imageSrc, setImageSrc] = useState(preDecode(src));
 
-  // Decode HTML entities safely
-  const decodeHtmlEntities = (text: string): string => {
-    if (typeof document !== 'undefined') {
-      const textarea = document.createElement('textarea');
-      textarea.innerHTML = text;
-      return textarea.value;
-    }
-    // Fallback for SSR: replace common entities
-    return text
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'");
-  };
-
+  // Still use useEffect for more robust decoding on client if needed
   useEffect(() => {
-    setIsClient(true);
-    const decodedSrc = decodeHtmlEntities(src);
-    setImageSrc(decodedSrc);
+    const decoded = preDecode(src);
+    if (decoded !== imageSrc) {
+      setImageSrc(decoded);
+    }
   }, [src]);
 
   const handleImageError = () => {
@@ -52,25 +46,11 @@ export default function SSRImage({
     }
   };
 
-  // Show placeholder if there's an error and no fallback, or if fallback also fails
-  if (imageError && (!fallbackSrc || imageSrc === fallbackSrc)) {
-    return (
-      <div className={`${className} bg-muted flex items-center justify-center`}>
-        <div className="text-center p-4">
-          <div className="text-4xl mb-2">📷</div>
-          <p className="text-sm text-muted-foreground">{fallbackText}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Render the image. For SSR, we want it to be visible immediately.
-  // On the client, we can use opacity for fade-in if needed, but let's keep it simple first.
   return (
     <img
       src={imageSrc}
       alt={alt}
-      className={className}
+      className={`${className} ${imageError && !fallbackSrc ? 'opacity-50 grayscale' : ''}`}
       onError={handleImageError}
       loading="lazy"
     />
