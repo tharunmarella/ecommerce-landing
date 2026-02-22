@@ -1,46 +1,74 @@
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { ShoppingCart, Heart } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingCart, Eye } from 'lucide-react';
+import SSRImage from './SSRImage';
 
 interface Product {
   id: number;
   name: string;
-  price: string;
+  price: number;
   image: string;
 }
 
-interface Props {
+interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: Props) {
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { addToCart, saveForLater } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Adding to cart:', product);
+    addToCart({ ...product, price: Number(product.price) });
+  };
+
+  const handleSaveForLater = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    saveForLater({ ...product, price: Number(product.price) });
+  };
+
   return (
-    <Link href={`/products/${product.id}`} className="group block">
-      <Card className="relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md cursor-pointer">
-        <div className="aspect-[3/4] w-full overflow-hidden bg-muted">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-          />
-          {/* Overlay Actions */}
-          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-            <Button size="icon" variant="secondary" className="h-10 w-10 rounded-full">
-              <Eye className="h-5 w-5" />
-              <span className="sr-only">View Details</span>
+    <Link href={`/products/${product.id}`} passHref>
+      <Card className="group cursor-pointer hover:shadow-lg transition-shadow duration-200">
+        <CardHeader className="p-0">
+          <div className="aspect-square overflow-hidden rounded-t-lg bg-muted relative">
+            <SSRImage
+              src={product.image}
+              alt={product.name}
+              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="p-4">
+          <CardTitle className="text-lg mb-2 line-clamp-2">{product.name}</CardTitle>
+          <p className="text-2xl font-bold text-primary mb-4">${product.price}</p>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Add to Cart
             </Button>
-            <Button size="icon" variant="secondary" className="h-10 w-10 rounded-full">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="sr-only">Add to Cart</span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleSaveForLater}
+            >
+              <Heart className="h-4 w-4" />
             </Button>
           </div>
-        </div>
-        <CardHeader className="p-4">
-          <CardTitle className="line-clamp-1 text-lg font-medium">{product.name}</CardTitle>
-          <p className="text-sm text-muted-foreground">${product.price}</p>
-        </CardHeader>
+        </CardContent>
       </Card>
     </Link>
   );
-}
+};
+
+export default ProductCard;

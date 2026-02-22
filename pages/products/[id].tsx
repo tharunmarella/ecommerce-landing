@@ -3,12 +3,15 @@ import Head from 'next/head';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import productsData from '@/lib/productsData'
+import SimpleImage from '@/components/SimpleImage';
+import SSRImage from '@/components/SSRImage';
+import prisma from '@/lib/prisma';
+import { useCart } from '@/context/CartContext';
 
 interface Product {
   id: number;
   name: string;
-  price: string;
+  price: number;
   image: string;
 }
 
@@ -17,6 +20,8 @@ interface Props {
 }
 
 export default function ProductPage({ product }: Props) {
+  const { addToCart, saveForLater } = useCart();
+
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
@@ -42,7 +47,7 @@ export default function ProductPage({ product }: Props) {
         <div className="grid gap-8 md:grid-cols-2 lg:gap-16">
           {/* Product Image */}
           <div className="aspect-square overflow-hidden rounded-lg bg-muted relative">
-            <img
+            <SSRImage
               src={product.image}
               alt={product.name}
               className="h-full w-full object-cover"
@@ -71,10 +76,19 @@ export default function ProductPage({ product }: Props) {
             </div>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button className="flex-1" size="lg">
+              <Button 
+                className="flex-1" 
+                size="lg"
+                onClick={() => addToCart(product)}
+              >
                 Add to Cart
               </Button>
-              <Button variant="outline" size="lg" className="flex-1">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="flex-1"
+                onClick={() => saveForLater(product)}
+              >
                 Save for Later
               </Button>
             </div>
@@ -93,7 +107,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     params: { id: product.id.toString() },
   }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: 'blocking' };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
@@ -102,9 +116,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     where: { id: parseInt(id as string) }
   });
 
+  if (!product) {
+    return {
+      notFound: true,
+    };
+  }
+
   return {
     props: {
-      product,
+      product: JSON.parse(JSON.stringify(product)),
     },
+    revalidate: 60
   };
 };

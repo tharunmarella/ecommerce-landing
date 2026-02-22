@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+build
+.git
+.env
+prisma/dev.db
+README.md
+docker-compose.yml

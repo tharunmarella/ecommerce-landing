@@ -1,63 +1,76 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/router';
-
-interface User {
-  username: string;
-  name: string;
-}
+import { useState, createContext, useContext, useEffect } from 'react';
 
 interface AuthContextType {
-  user: User | null;
-  login: (username: string) => void;
+  user: any;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<any>(null);
 
-  // Check for existing session on mount
   useEffect(() => {
+    // Restore session from localStorage on mount
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Failed to parse user from local storage');
-        localStorage.removeItem('user');
-      }
+      setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  const login = (username: string) => {
-    // In a real app, you'd validate credentials here or receive a token.
-    // Since we're mocking, we just set the user.
-    const newUser = { username, name: 'Demo User' };
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    router.push('/');
+  const login = async (email: string, password: string) => {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error ?? 'Login failed');
+    }
+
+    const { user: loggedInUser } = await res.json();
+    setUser(loggedInUser);
+    localStorage.setItem('user', JSON.stringify(loggedInUser));
+    window.location.href = '/';
+  };
+
+  const register = async (email: string, password: string) => {
+    const res = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error ?? 'Registration failed');
+    }
+
+    // Redirect to login after successful registration
+    window.location.href = '/login';
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    router.push('/login');
+    window.location.href = '/';
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};

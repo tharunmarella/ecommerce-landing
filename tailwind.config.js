@@ -16,6 +16,5 @@ module.exports = {
   plugins: [
     nextui(),
     require('tailwindcss-animate'),
-    require('tailwind-merge/plugin')
   ],
 }

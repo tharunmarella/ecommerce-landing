@@ -1,43 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
-export default function Login() {
+export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const { login, user } = useAuth();
 
-  // If already logged in, redirect to home
-  useEffect(() => {
-    if (user) {
-      router.push('/');
-    }
-  }, [user, router]);
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
+    
     try {
-      await login(email, password);
-    } catch (err: any) {
-      setError(err.message ?? 'Invalid email or password');
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+
+      if (res.ok) {
+        router.push('/login');
+      } else {
+        setError('Signup failed. Try again.');
+      }
+    } catch (err) {
+      setError('Network error');
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Head>
-        <title>Login | LuxeStore</title>
-        <meta name="description" content="Login to your LuxeStore account." />
+        <title>Sign Up | LuxeStore</title>
+        <meta name="description" content="Create a new LuxeStore account." />
       </Head>
 
       <Header />
@@ -46,10 +47,10 @@ export default function Login() {
         <div className="max-w-md w-full space-y-8 bg-card p-8 rounded-lg shadow-md border">
           <div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
-              Sign in to your account
+              Create an account
             </h2>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="rounded-md shadow-sm space-y-4">
               <div>
                 <label htmlFor="email" className="sr-only">
@@ -60,9 +61,10 @@ export default function Login() {
                   name="email"
                   type="email"
                   required
-                  placeholder="Email address"
+                  placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="w-full"
                 />
               </div>
               <div>
@@ -77,6 +79,7 @@ export default function Login() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="w-full"
                 />
               </div>
             </div>
@@ -88,15 +91,16 @@ export default function Login() {
             )}
 
             <div>
-              <Button type="submit" className="w-full">
-                Sign in
+              <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600">
+                Sign Up
               </Button>
             </div>
           </form>
+
           <div className="text-center mt-4">
-            <Link href="/signup" passHref>
+            <Link href="/login" passHref>
               <Button variant="outline" className="w-full">
-                Sign up
+                Back to Login
               </Button>
             </Link>
           </div>

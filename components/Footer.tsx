@@ -1,9 +1,40 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Youtube, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message);
+        setEmail('');
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-gray-300 py-12">
       <div className="container mx-auto px-4">
@@ -43,13 +74,18 @@ export default function Footer() {
           <div>
             <h3 className="text-white text-lg font-bold mb-4">Newsletter</h3>
             <p className="text-sm mb-4">Subscribe to receive updates, access to exclusive deals, and more.</p>
-            <form className="flex gap-2">
+            <form className="flex gap-2" onSubmit={handleSubscribe}>
               <Input 
                 type="email" 
                 placeholder="Enter your email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:ring-white focus:border-white"
               />
-              <Button type="submit" variant="secondary">Subscribe</Button>
+              <Button type="submit" variant="secondary" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Subscribe'}
+              </Button>
             </form>
           </div>
         </div>

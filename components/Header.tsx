@@ -10,13 +10,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ShoppingCart, User, Search, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 export default function Header() {
-  const { isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const { cart } = useCart();
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-8">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-8">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center space-x-2">
@@ -24,30 +27,30 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="/" className="transition-colors hover:text-foreground/80 text-foreground/60">
+        {/* Desktop Navigation - Centered */}
+        <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm font-medium">
+          <Link href="/" className="transition-colors hover:text-foreground text-foreground/60">
             Home
           </Link>
-          <Link href="/shop" className="transition-colors hover:text-foreground/80 text-foreground/60">
+          <Link href="/shop" className="transition-colors hover:text-foreground text-foreground/60">
             Shop
           </Link>
-          <Link href="/about" className="transition-colors hover:text-foreground/80 text-foreground/60">
+          <Link href="/about" className="transition-colors hover:text-foreground text-foreground/60">
             About
           </Link>
-          <Link href="/contact" className="transition-colors hover:text-foreground/80 text-foreground/60">
+          <Link href="/contact" className="transition-colors hover:text-foreground text-foreground/60">
             Contact
           </Link>
         </nav>
 
         {/* Icons / Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <Button variant="ghost" size="icon" className="hidden sm:flex">
             <Search className="h-5 w-5" />
             <span className="sr-only">Search</span>
           </Button>
           
-          {isAuthenticated ? (
+          {!!user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -75,10 +78,17 @@ export default function Header() {
             </Button>
           )}
 
-          <Button variant="ghost" size="icon">
-            <ShoppingCart className="h-5 w-5" />
-            <span className="sr-only">Cart</span>
-          </Button>
+          <Link href="/cart" passHref>
+            <Button variant="ghost" size="icon" className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                  {cartItemCount}
+                </span>
+              )}
+              <span className="sr-only">Cart</span>
+            </Button>
+          </Link>
 
           {/* Mobile Menu Trigger */}
           <div className="md:hidden">
@@ -102,7 +112,7 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link href="/contact">Contact</Link>
                 </DropdownMenuItem>
-                {!isAuthenticated && (
+                {!user && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>

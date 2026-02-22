@@ -1,11 +1,11 @@
-import Head from 'next/head'
-import Header from '../components/Header'
-import Hero from '../components/Hero'
-import ProductCard from '../components/ProductCard'
-import Footer from '../components/Footer'
-import productsData from '@/lib/productsData'
+import Head from 'next/head';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import Hero from '../components/Hero';
+import ProductCard from '../components/ProductCard';
+import prisma from '../lib/prisma';
 
-export default function Home({ products }: { products: Array<{ id: number; name: string; price: string; image: string }> }) {
+export default function Home({ products }: { products: Array<{ id: number; name: string; price: number; image: string }> }) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Head>
@@ -29,7 +29,7 @@ export default function Home({ products }: { products: Array<{ id: number; name:
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={{...product, price: Number(product.price)}} />
             ))}
           </div>
         </section>
@@ -64,7 +64,12 @@ export default function Home({ products }: { products: Array<{ id: number; name:
   )
 }
 
-export function getStaticProps() {
-  const products = productsData;
-  return { props: { products } };
+export async function getStaticProps() {
+  const products = await prisma.product.findMany();
+  return { 
+    props: { 
+      products: JSON.parse(JSON.stringify(products)) 
+    },
+    revalidate: 60
+  };
 }

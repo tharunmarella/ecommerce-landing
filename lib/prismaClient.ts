@@ -8,8 +8,6 @@ const pool = new Pool({
 
 const adapter = new PrismaPg(pool)
 
-const prisma = new PrismaClient({
-  adapter
-})
+const prisma = new PrismaClient()
 
 export default prisma
