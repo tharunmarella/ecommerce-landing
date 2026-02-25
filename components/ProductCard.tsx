@@ -12,6 +12,7 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  images?: { id: number; url: string }[];
 }
 
 interface ProductCardProps {
@@ -20,6 +21,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart, saveForLater } = useCart();
+  const [currentImage, setCurrentImage] = React.useState(product.image);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -36,11 +38,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <Link href={`/products/${product.id}`} passHref>
-      <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 border-none bg-card/50 backdrop-blur-sm">
+      <Card 
+        className="group cursor-pointer hover:shadow-lg transition-all duration-300 border-none bg-card/50 backdrop-blur-sm"
+        onMouseEnter={() => product.images && product.images.length > 1 && setCurrentImage(product.images[1].url)}
+        onMouseLeave={() => setCurrentImage(product.image)}
+      >
         <CardHeader className="p-0">
           <AspectRatio ratio={1 / 1} className="overflow-hidden rounded-t-lg bg-muted">
             <SSRImage
-              src={product.image}
+              src={currentImage}
               alt={product.name}
               className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
             />

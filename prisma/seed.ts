@@ -1,7 +1,6 @@
 import prisma from "../lib/prisma";
 import * as bcrypt from 'bcrypt';
 
-// Sample product data to seed the database. Adjust as needed.
 const products = [
   {
     name: "Classic T-Shirt",
@@ -129,12 +128,26 @@ const products = [
     stock: 140,
     sales: 0,
   },
+  {
+    name: "Laptop Sleeve",
+    price: "34.99",
+    image: "https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?auto=format&fit=crop&w=800&q=80",
+    stock: 65,
+    sales: 0,
+  },
+  {
+    name: "Ceramic Coffee Mug",
+    price: "12.99",
+    image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=800&q=80",
+    stock: 150,
+    sales: 0,
+  },
 ];
 
 async function main() {
   console.log('Start seeding...')
 
-  // Create admin user if it doesn't exist (password is hashed with bcrypt)
+  // Create admin user if it doesn't exist
   const hashedPassword = await bcrypt.hash('admin123', 10);
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
@@ -152,7 +165,16 @@ async function main() {
   // Create products
   for (const product of products) {
     const createdProduct = await prisma.product.create({
-      data: product,
+      data: {
+        ...product,
+        images: {
+          create: [
+            { url: product.image },
+            { url: "https://via.placeholder.com/800?text=Image+2" },
+            { url: "https://via.placeholder.com/800?text=Image+3" },
+          ]
+        }
+      },
     });
     console.log(`Created product: ${createdProduct.name}`);
   }

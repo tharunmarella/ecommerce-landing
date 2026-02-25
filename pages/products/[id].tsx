@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  images?: { id: number; url: string }[];
 }
 
 interface Props {
@@ -21,7 +23,19 @@ interface Props {
 export default function ProductPage({ product }: Props) {
   const { addToCart, saveForLater } = useCart();
 
-  if (!product) {
+    const [selectedImage, setSelectedImage] = useState(product.image);
+
+  
+
+    useEffect(() => {
+
+      setSelectedImage(product.image);
+
+    }, [product.image]);
+
+  
+
+    if (!product) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
@@ -45,12 +59,34 @@ export default function ProductPage({ product }: Props) {
       <main className="flex-grow container mx-auto px-4 py-16">
         <div className="grid gap-8 md:grid-cols-2 lg:gap-16">
           {/* Product Image */}
-          <div className="aspect-square overflow-hidden rounded-lg bg-muted relative">
-            <SSRImage
-              src={product.image}
-              alt={product.name}
-              className="h-full w-full object-cover"
-            />
+          <div className="space-y-4">
+            <div className="aspect-square overflow-hidden rounded-lg bg-muted relative">
+              <SSRImage
+                src={selectedImage}
+                alt={product.name}
+                className="h-full w-full object-cover transition-all duration-300"
+              />
+            </div>
+            
+            {product.images && product.images.length > 0 && (
+              <div className="grid grid-cols-4 gap-4">
+                {product.images.map((img) => (
+                  <button
+                    key={img.id}
+                    onClick={() => setSelectedImage(img.url)}
+                    className={`aspect-square overflow-hidden rounded-md bg-muted border-2 transition-all ${
+                      selectedImage === img.url ? 'border-primary' : 'border-transparent hover:border-muted-foreground'
+                    }`}
+                  >
+                    <SSRImage
+                      src={img.url}
+                      alt={`${product.name} - image ${img.id}`}
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Details */}
@@ -112,7 +148,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const id = params?.id;
   const product = await prisma.product.findUnique({
-    where: { id: parseInt(id as string) }
+    where: { id: parseInt(id as string) },
+    include: { images: true }
   });
 
   if (!product) {

@@ -18,6 +18,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
     "incremental": true,
     "baseUrl": ".",
     "paths": {

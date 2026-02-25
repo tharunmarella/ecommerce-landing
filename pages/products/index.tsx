@@ -11,6 +11,7 @@ interface Product {
   description: string;
   price: number;
   image: string;
+  images?: { id: number; url: string }[];
 }
 
 interface ProductsPageProps {
@@ -43,7 +44,9 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products }) => {
 };
 
 export const getStaticProps: GetStaticProps = async () => {
-  const products = await prisma.product.findMany();
+  const products = await prisma.product.findMany({
+    include: { images: true }
+  });
 
   return {
     props: {
