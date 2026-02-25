@@ -4,16 +4,29 @@ import Footer from '../components/Footer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
+import { useRouter } from 'next/router';
 
 export default function SuccessPage() {
   const { cart, removeFromCart } = useCart();
+  const router = useRouter();
+  const recorded = useRef(false);
 
-  // Clear cart on successful payment
+  // Record the order in the database once, then clear the cart.
   useEffect(() => {
+    const { session_id } = router.query;
+    if (!session_id || recorded.current) return;
+    recorded.current = true;
+
+    fetch('/api/record-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: session_id }),
+    }).catch((err) => console.error('[success] record-order failed:', err));
+
     cart.forEach(item => removeFromCart(item.id));
-  }, []);
+  }, [router.query]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

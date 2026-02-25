@@ -16,6 +16,7 @@ export default async function handler(
       console.log('Items received in API:', items);
 
       // Create Checkout Sessions from body params.
+      // Embed cart items in metadata so the success page can record the order.
       const session = await stripe.checkout.sessions.create({
         line_items: items.map((item: any) => ({
           price_data: {
@@ -31,6 +32,16 @@ export default async function handler(
         mode: 'payment',
         success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.origin}/cart`,
+        metadata: {
+          // Stripe metadata values must be strings; store cart as JSON.
+          cartItems: JSON.stringify(
+            items.map((item: any) => ({
+              id: item.id,
+              quantity: item.quantity,
+              price: Number(item.price),
+            }))
+          ),
+        },
       });
       console.log('Stripe session created:', session);
 
