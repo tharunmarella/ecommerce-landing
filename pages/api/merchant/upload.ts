@@ -40,6 +40,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Authentication check
+  const userHeader = req.headers['x-user'];
+  if (!userHeader) {
+    return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+  }
+
+  let user;
+  try {
+    user = typeof userHeader === 'string' ? JSON.parse(userHeader) : userHeader;
+  } catch {
+    return res.status(401).json({ error: 'Unauthorized: Invalid user data' });
+  }
+
+  if (!user || !user.email) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid user' });
+  }
+
   try {
     const { files } = await parseForm(req);
 

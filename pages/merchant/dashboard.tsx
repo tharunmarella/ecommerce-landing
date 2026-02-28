@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Overview } from "@/components/dashboard/overview";
 import { RecentSales } from "@/components/dashboard/recent-sales";
+import { useAuth } from '@/context/AuthContext';
 
 interface Product {
   id: number;
@@ -22,6 +24,8 @@ interface Product {
 }
 
 export default function MerchantDashboard() {
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -30,17 +34,33 @@ export default function MerchantDashboard() {
   const [newProduct, setNewProduct] = useState({ name: '', price: '', stock: '', image: '' });
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Authentication check - redirect to login if not authenticated
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (!user && !storedUser) {
+      router.push('/login');
+    }
+  }, [user, router]);
+
   // Image upload state
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Helper to get auth headers
+  const getAuthHeaders = () => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? { 'x-user': storedUser } : {};
+  };
+
   // Fetch all products from the DB
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/merchant/products');
+      const res = await fetch('/api/merchant/products', {
+        headers: { ...getAuthHeaders() },
+      });
       if (!res.ok) throw new Error('Failed to fetch');
       const raw: Product[] = await res.json();
       // Prisma returns `price` as a Decimal object, not a plain JS number.
@@ -85,7 +105,11 @@ export default function MerchantDashboard() {
     try {
       const formData = new FormData();
       formData.append('image', imageFile);
-      const res = await fetch('/api/merchant/upload', { method: 'POST', body: formData });
+      const res = await fetch('/api/merchant/upload', {
+        method: 'POST',
+        headers: { ...getAuthHeaders() },
+        body: formData,
+      });
       if (!res.ok) throw new Error('Upload failed');
       const { url } = await res.json();
       return url as string;
@@ -107,7 +131,10 @@ export default function MerchantDashboard() {
       const imageUrl = await uploadImage();
       const res = await fetch('/api/merchant/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify({
           name: newProduct.name,
           price: parseFloat(newProduct.price),
@@ -128,7 +155,10 @@ export default function MerchantDashboard() {
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await fetch(`/api/merchant/products?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/merchant/products?id=${id}`, {
+        method: 'DELETE',
+        headers: { ...getAuthHeaders() },
+      });
       if (!res.ok) throw new Error('Failed to delete product');
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (err) {
@@ -141,7 +171,10 @@ export default function MerchantDashboard() {
     try {
       const res = await fetch('/api/merchant/products', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify(editingProduct),
       });
       if (!res.ok) throw new Error('Failed to update product');

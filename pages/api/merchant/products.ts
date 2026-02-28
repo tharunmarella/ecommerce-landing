@@ -4,7 +4,30 @@ import { PrismaClient } from '@prisma/client';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const prisma = new PrismaClient();
 
+  // Authentication check
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Unauthorized: No token provided' });
+  }
+
   try {
+    // Verify token and get user from localStorage (client-side sends user info in header)
+    // For simplicity, we'll check if the user object is passed in a custom header
+    const userHeader = req.headers['x-user'];
+    if (!userHeader) {
+      return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+    }
+
+    let user;
+    try {
+      user = typeof userHeader === 'string' ? JSON.parse(userHeader) : userHeader;
+    } catch {
+      return res.status(401).json({ error: 'Unauthorized: Invalid user data' });
+    }
+
+    if (!user || !user.email) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid user' });
+    }
     // GET /api/merchant/products — list all products
     if (req.method === 'GET') {
       const products = await prisma.product.findMany({

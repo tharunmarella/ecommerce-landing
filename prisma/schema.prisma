@@ -15,6 +15,16 @@ model User {
   createdAt DateTime @default(now())
 }
 
+model Merchant {
+  id              Int      @id @default(autoincrement())
+  email           String   @unique
+  password        String
+  businessName    String
+  businessAddress String?
+  phone           String?
+  createdAt       DateTime @default(now())
+}
+
 model Newsletter {
   id        Int      @id @default(autoincrement())
   email     String   @unique
